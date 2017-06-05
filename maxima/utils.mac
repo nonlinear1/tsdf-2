@@ -1,0 +1,233 @@
+/* abs of a vector */
+load ("eigen");
+unmatrix(M):=map('first, args(M));
+vsq(L):= lsum(e^2, e, L);
+vabs(L):= sqrt(vsq(L));
+
+/* `copy' a length of vector */
+cl(A, B):= block([listarith: true],
+  vabs(B)/vabs(A)*A);
+
+/* compliment shift vector (a first argument) and a basis to a full
+ortogonal basis + shift vector. Return two functions: transformation
+to (F) and from (B) a new basis (see rtest_utils.mac for examples)
+
+(%i1) [F, B]: fullb([4,10], [5, 8]) $
+
+(%i2) F([4,10]);
+(%o2)                               [0, 0]
+(%i3) F([5,8]);
+(%o3)                               [1, 0]
+
+
+(%i1) [F, B]: fullb([4,10], [5, 8]) $
+
+(%i2) B([0,0]);
+(%o2)                               [4, 10]
+(%i3) B([1,0]);
+(%o3)                               [5, 8]
+
+*/
+fullb(P0, [RST_in]):=block([listarith: true, %P0%: P0],
+  if emptyp(RST_in) then error("`fullb' should have at least two arguments"),
+  fullb1(RST_in));
+
+fullb1(RST_in):= block([RST],
+  RST: create_list(R-%P0%, R, RST_in),
+  fullb2(RST));
+
+/* extend RST with vectors of `orthogonal_complement' */
+fullb2(RST):= block([EXT],
+  EXT: apply(orthogonal_complement,
+    map('columnvector, RST)),
+  EXT: map('unmatrix, args(EXT)),
+  fullb3(append(RST, EXT)));
+
+/* `BAS' is full basis */
+fullb3(BAS):=fullb4(ratexpand(gramschmidt(BAS)));
+
+/* `copy' length of the first vector to all */
+fullb4(BAS):= block([F: first(BAS)],
+  fullb5(create_list( cl(R, F), R, BAS)));
+
+fullb5(BAS):=fullb6(transpose(apply('matrix, BAS)));
+
+fullb6(M):= block([F, B],
+  F: buildq([rM: M^^(-1), cv: columnvector(%P0%)],
+    lambda([X],
+      unmatrix(rM.(columnvector(X) - cv)))),
+  B: buildq([M, cv: columnvector(%P0%)],
+    lambda([X],
+      unmatrix(M.columnvector(X) + cv))),
+  [F, B]);
+
+segment_fraction(fr, xl, xh):= xl + fr*(xh - xl);
+
+safe_first(l):= if listp(l) then first(l) else l;
+
+file2string(fin):= block([sout: make_string_output_stream()],
+  with_stdout(sout,
+    printfile(fin)));
+
+/* like `with_stdout' but returns string */
+with_strout([L])::= buildq([sout: gensym(), L],
+  (sout : make_string_output_stream(),
+    with_stdout(sout, splice(L)),
+    get_output_stream_string(sout)));
+
+
+%eps%: 2*?double\-float\-epsilon;
+
+/* needs this for periodic boundary in 2D */
+pdelta: [[-1, -1], [-1, 0], [-1, 1],
+         [ 0, -1], [ 0, 0], [ 0, 1],
+         [ 1, -1], [ 1, 0], [ 1, 1]];
+
+linspace(x1, x2, n):= block([out: [], d: (x2 - x1)/(n-1)], local(out),
+  for i: 0 thru n-1 do out: cons( x1 + d*i, out), reverse(out));
+
+pr([L])::= buildq([A: cons(true, L)],
+  printf(splice(A)));
+
+/* shrink a segment by a fraction */
+shrink_segment(L, fr):=block([A: part(L, 1), B: part(L, 2), d],
+  d: B - A,
+  A: A + d*fr/2,
+  B: B - d*fr/2,
+  [A, B]);
+
+/* polar to xy and back */
+xy2p(x, y):= block([r: sqrt(x^2 + y^2), p: atan2(y, x)],
+  [r, p]);
+p2xy(r, p):= block([x: r*cos(p), y: r*sin(p)],
+  [x, y]);
+
+/* return extents of an object given in polar coordinates */
+getxtends(r_fun, [ns]):= block([xl, yl, xh, yh, x, y, ns: if emptyp(ns) then 100 else first(ns), p, r, numer: true],
+  xl: yl: ?most\-positive\-double\-float,
+  xh: yh: ?least\-negative\-double\-float,
+  for i thru ns do (
+    p: 2*%pi/ns*i,
+    r  : r_fun(p),
+    [x, y]: p2xy(r, p),
+    xl: min(x, xl), yl: min(y, yl),
+    xh: max(x, xh), yh: max(y, yh)),
+  [xl, yl, xh, yh]);
+
+/* `true' is segment `S1' is inside segment `S2' */
+segment_in_segmentp(S1, S2):= block([prederror: true], local(S1, S2),
+  S1[1] >= S2[1] and S1[1] <= S2[2]
+  and
+  S1[2] >= S2[1] and S1[2] <= S2[2]);
+
+/* is rectangle R1 inside rectangle R2 */
+rect_in_rectp(R1, R2):= block([prederror: true], local(R1, R2),
+  segment_in_segmentp([R1[1], R1[3]], [R2[1], R2[3]])
+  and
+  segment_in_segmentp([R1[2], R1[4]], [R2[2], R2[4]]));
+
+/* `true' is segments `S1' and `S2' overap */
+segment_overalp(S1, S2):= block([prederror: true], local(S1, S2),
+  S1[2] >= S2[1] and S2[2] >= S1[1]);
+
+rect_overlap(R1, R2):= block([prederror: true], local(R1, R2),
+  segment_overalp([R1[1], R1[3]], [R2[1], R2[3]])
+  and
+  segment_overalp([R1[2], R1[4]], [R2[2], R2[4]]));
+
+point_in_rectp(P, R):= block([prederror: true], local(P, R),
+  P[1] >= R[1] and P[1] <= R[3] and
+  P[2] >= R[2] and P[2] <= R[4]);
+
+/*
+Objects in polar coordinates  (r = r(phi))
+http://en.wikipedia.org/wiki/Ellipse#Polar_form_relative_to_center
+http://www.mathematische-basteleien.de/eggcurves.htm
+*/
+make_ellipse(a, b)::= buildq([a, b], lambda([phi],block([x: b*cos(phi), y: a*sin(phi)],
+      a*b/sqrt(x^2 + y^2))));
+
+make_egg(a, b, beta_x, [beta_y])::= buildq([a, b, beta_x, beta_y: if emptyp(beta_y) then 0 else first(beta_y)],
+  make_egg_aux(a, b, beta_x, beta_y));
+make_egg_aux(a, b, beta_x, beta_y)::= buildq([a, b, t_x: exp(beta_x*'y/b), t_y: exp(beta_y*'x/a)],
+  lambda([phi], block([x: b*cos(phi), y: a*sin(phi)],
+      a*b/sqrt(t_x*x^2 + t_y*y^2))));
+
+make_squircle(a, b)::=buildq([a, b, n: 3],
+  lambda([phi], block([x: abs(b*cos(phi)), y: abs(a*sin(phi))],
+      a*b/(x^n + y^n)^(1/n))));
+
+/* rotate an object by angle p0 (radians and degree) */
+rot_rad(r_fun, p0):=subst(body=r_fun('p+p0), lambda([p], body));
+rot_deg(r_fun, p0):= rot_rad(r_fun, p0*%pi/180);
+
+spl_channel(lmb):= block([ans: [], eq, so], local(P, v, smallest_real),
+  smallest_real(l):= block([s: map(rhs, l)],
+    s: map(rectform, s),
+    s: float(s),
+    s: sublist(s, lambda([r], imagpart(r)=0 and realpart(r)>=0)),
+    if emptyp(s) then [] else first(sort(s))),
+  v(x):= x*(1-x) ,
+  P(x):= integrate( v('xx), 'xx, 0, x) ,
+  eq  : P('x) = ('fr - 1)/'lmb * P(1),
+  for fr thru lmb+1 do (
+    so: solve(subst(['fr=fr, 'lmb=lmb, 'L=L], eq)),
+    ans: cons(smallest_real(so), ans)),
+  reverse(ans));
+
+
+/*
+defind wrapper functions (wrx, wry, wrz)
+for periodic boundary conditions
+dom: [xl, yl, zl, xh, yh, zh] */
+make_pbc_wrap(dom):= block([dlist: ['wrx, 'wry, 'wrz]], local(frac, dlist, dom),
+  for d thru 3 do
+  define(funmake(dlist[d], ['r]),
+    if dom[d]#inf then
+    buildq([rl: dom[d], rh: dom[3+d]],
+      (mode_declare([r], flonum),
+      block([r: r - rl, Lr: rh - rl],
+        r - floor(r / Lr) * Lr + rl)))
+    else
+    'r),
+  'done);
+
+fblock(e):=buildq([v: listofvars(e), rst: if mapatom(e) then [e] else rest(args(e))],
+  block([splice(v)],
+    mode_declare(v, 'flonum),
+    splice(rst)));
+
+fsign(x):= (mode_declare(x, flonum), if x>0 then 1 elseif x<0 then -1 else 0);
+
+
+fblock(e):= if mapatom(e) or part(e, 0)#block then e else fblock_aux(e);
+fblock_aux(e):=buildq([v: listofvars(part(e, 1)), rst: if mapatom(e) then [e] else rest(args(e))],
+  block([splice(v)],
+    mode_declare(v, flonum),
+    splice(rst)));
+
+dfloat(e):= block([numer: true, ans],
+  ans: float(ev(e, numer, noeval)),
+  subst('%pi=float(%pi), ans));
+
+nfloat(e):= block([e: subst(?erf, erf, e)],
+  e: subst(lambda([a], expt(a, 0.5)), 'sqrt, e),  
+  e: subst(?expt, expt, e),
+  float(ev(e, numer, noeval)));
+
+foptimize(e):=fblock(optimize(nfloat(e)));
+
+edist(r_e):= block([r, ang, x1, y1, x2, y2, dist, rang], local(undel),
+  [r, ang]: xy2p('x0, 'y0),
+  /* first point on the tangential line */
+  rang    : r_e(ang),
+  [x1, y1]: p2xy(rang, ang),
+  /* second point on the tangential line */
+  [x2, y2]: [x1, y1] + diff(p2xy(r_e('p), 'p)),
+  matchdeclare(A, true),
+  defrule(undel, del(A), 0),
+  [x2, y2]: subst([del('p)=1, p=ang], [x2, y2]),
+  [x2, y2]: apply1([x2, y2], undel),
+  dist: - ((y2-y1)*'x0 - (x2-x1)*'y0 + x2*y1 - y2*x1)/sqrt((y2-y1)^2 + (x2-x1)^2),
+  dist: fullratsimp(trigsimp(dist)),
+  dist);
