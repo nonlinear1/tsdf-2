@@ -1,14 +1,14 @@
 CPPFLAGS = -O2 -g -Wall -Wextra
 
-all: sdf2volume sdf2volume2 sdf2vtk mergesdf
+P = sdf2volume sdf2volume2 sdf2vtk mergesdf # prgrams
+all: $P
 
-BIN  = $(HOME)/bin
-CONF = $(HOME)/.udx
+B  = $(HOME)/bin
+C =  $(HOME)/.udx
 
-install: install_bin install_conf
+install: all install_bin install_conf
 
-install_bin: ;  cp tsdf tsdf.awk sdf2volume sdf2volume2 sdf2vtk mergesdf    $(BIN)
-install_conf: ; mkdir -p $(CONF) && \
-	        cp processor.tmp.cpp                               $(CONF)
+install_bin: ;                 cp $P                $B
+install_conf: ; mkdir -p $C && cp processor.tmp.cpp $C
 
 clean: ; -rm sdf2volume sdf2vtk mergesdf

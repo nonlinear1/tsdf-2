@@ -2,57 +2,6 @@
 
 # tsdf - tiny sdf generator
 #   usage: tsdf def_file sdf_file [vtk_file]
-# TEST: tsdf1
-# tsdf examples/ywall1.tsdf sdf.dat sdf.out.vti
-#
-# TEST: tsdf2
-# tsdf examples/ywall2.tsdf sdf.dat sdf.out.vti
-#
-# TEST: tsdf3
-# tsdf examples/sphere1.tsdf sdf.dat sdf.out.vti
-#
-# TEST: tsdf4
-# tsdf examples/sphere2.tsdf sdf.dat sdf.out.vti
-#
-# TEST: tsdf5
-# tsdf examples/cylinder1.tsdf sdf.dat sdf.out.vti
-#
-# TEST: tsdf6
-# tsdf examples/cylinder2.tsdf sdf.dat sdf.out.vti
-#
-# TEST: tsdf7
-# tsdf examples/out_sphere1.tsdf sdf.dat sdf.out.vti
-#
-# TEST: tsdf8
-# tsdf examples/out_cylinder1.tsdf sdf.dat sdf.out.vti
-#
-# TEST: tsdf9
-# tsdf examples/channel1.tsdf sdf.dat sdf.out.vti
-#
-# TEST: tsdf10
-# tsdf examples/block1.tsdf sdf.dat sdf.out.vti
-#
-# TEST: tsdf11
-# tsdf examples/block2.tsdf sdf.dat sdf.out.vti
-#
-# TEST: tsdf12
-# tsdf examples/ellipse1.tsdf sdf.dat sdf.out.vti
-#
-# TEST: tsdf13
-# tsdf examples/egg1.tsdf sdf.dat sdf.out.vti
-#
-# TEST: tsdf14
-# tsdf examples/block1rot.tsdf sdf.dat sdf.out.vti
-#
-# TEST: tsdf15
-# tsdf examples/egg1rot.tsdf   sdf.dat sdf.out.vti
-#
-# TEST: tsdf16
-# tsdf examples/cylinder1rot.tsdf  sdf.dat sdf.out.vti
-#
-# TEST: tsdf17
-# tsdf examples/rot2.tsdf  sdf.dat sdf.out.vti
-
 
 function randint(n) { return int(rand()*n)+1 }
 
@@ -511,3 +460,54 @@ $1 == "egg" {
 {
     prev_rot = 0 # previous command is not rotation
 }
+
+# TEST: tsdf1
+# tsdf examples/ywall1.tsdf sdf.dat sdf.out.vti
+#
+# TEST: tsdf2
+# tsdf examples/ywall2.tsdf sdf.dat sdf.out.vti
+#
+# TEST: tsdf3
+# tsdf examples/sphere1.tsdf sdf.dat sdf.out.vti
+#
+# TEST: tsdf4
+# tsdf examples/sphere2.tsdf sdf.dat sdf.out.vti
+#
+# TEST: tsdf5
+# tsdf examples/cylinder1.tsdf sdf.dat sdf.out.vti
+#
+# TEST: tsdf6
+# tsdf examples/cylinder2.tsdf sdf.dat sdf.out.vti
+#
+# TEST: tsdf7
+# tsdf examples/out_sphere1.tsdf sdf.dat sdf.out.vti
+#
+# TEST: tsdf8
+# tsdf examples/out_cylinder1.tsdf sdf.dat sdf.out.vti
+#
+# TEST: tsdf9
+# tsdf examples/channel1.tsdf sdf.dat sdf.out.vti
+#
+# TEST: tsdf10
+# tsdf examples/block1.tsdf sdf.dat sdf.out.vti
+#
+# TEST: tsdf11
+# tsdf examples/block2.tsdf sdf.dat sdf.out.vti
+#
+# TEST: tsdf12
+# tsdf examples/ellipse1.tsdf sdf.dat sdf.out.vti
+#
+# TEST: tsdf13
+# tsdf examples/egg1.tsdf sdf.dat sdf.out.vti
+#
+# TEST: tsdf14
+# tsdf examples/block1rot.tsdf sdf.dat sdf.out.vti
+#
+# TEST: tsdf15
+# tsdf examples/egg1rot.tsdf   sdf.dat sdf.out.vti
+#
+# TEST: tsdf16
+# tsdf examples/cylinder1rot.tsdf  sdf.dat sdf.out.vti
+#
+# TEST: tsdf17
+# tsdf examples/rot2.tsdf  sdf.dat sdf.out.vti
