@@ -61,7 +61,7 @@ function format_expr( e,     i, n, ans, tab, sep) {
 	sep = ",\n"
     }
     ans = ans "\n" tab ")"
-    
+
     return ans
 }
 
@@ -86,6 +86,15 @@ function add_rc_plane(e, m) { # add plane center of rotation
     e[++m] = "zo = " upd_def(zo, "zo", "zc")
     return m
 }
+
+function expr_point(    e, x0, y0, z0, i, m) {
+    i = 2
+    x0 = $(i++); y0 = $(i++); z0 = $(i++)
+    e[++m] =         "x  = xorg, y = yorg, z = zorg"
+    e[++m] = sprintf("gauss(x - (%s), y - (%s), z - (%s))", x0, y0, z0)
+    return format_expr(e)
+}
+
 function expr_plane(     nx, ny, nz, x0, y0, z0,     m, e) {
     x0=$3; y0=$4; z0=$5
     nx=$7;  ny=$8;  nz=$9
@@ -95,7 +104,7 @@ function expr_plane(     nx, ny, nz, x0, y0, z0,     m, e) {
 	m = add_rot(e, m)
     }
     e[++m] = sprintf("nx = %s, ny = %s, nz = %s", nx, ny, nz)
-    e[++m] = sprintf("x0 = %s, y0 = %s, z0 = %s", x0, y0, z0)     
+    e[++m] = sprintf("x0 = %s, y0 = %s, z0 = %s", x0, y0, z0)
     e[++m] = "n_abs = sqrt(nz*nz+ny*ny+nx*nx)"
     e[++m] = "(nz*(z0-z))/n_abs+(ny*(y0-y))/n_abs+(nx*(x0-x))/n_abs"
     return format_expr(e)
@@ -117,14 +126,14 @@ function expr_cylinder(     ) {
 	m = add_rot(e, m)
     }
     e[++m] = sprintf("ax = %s, ay = %s, az = %s", ax, ay, az)
-    e[++m] = sprintf("xp = %s, yp = %s, zp = %s", xp, yp, zp)    
+    e[++m] = sprintf("xp = %s, yp = %s, zp = %s", xp, yp, zp)
     e[++m] = "a2 = az*az+ay*ay+ax*ax"
     e[++m] = "D = sqrt((z-(az*(az*(z-zp)+ay*(y-yp)+ax*(x-xp)))/a2-zp)" \
-          "*(z-(az*(az*(z-zp)+ay*(y-yp)+ax*(x-xp)))/a2-zp)" \
-          "+(y-yp-(ay*(az*(z-zp)+ay*(y-yp)+ax*(x-xp)))/a2)" \
-          " *(y-yp-(ay*(az*(z-zp)+ay*(y-yp)+ax*(x-xp)))/a2)" \
-          "+(x-xp-(ax*(az*(z-zp)+ay*(y-yp)+ax*(x-xp)))/a2)" \
-          " *(x-xp-(ax*(az*(z-zp)+ay*(y-yp)+ax*(x-xp)))/a2))"
+	  "*(z-(az*(az*(z-zp)+ay*(y-yp)+ax*(x-xp)))/a2-zp)" \
+	  "+(y-yp-(ay*(az*(z-zp)+ay*(y-yp)+ax*(x-xp)))/a2)" \
+	  " *(y-yp-(ay*(az*(z-zp)+ay*(y-yp)+ax*(x-xp)))/a2)" \
+	  "+(x-xp-(ax*(az*(z-zp)+ay*(y-yp)+ax*(x-xp)))/a2)" \
+	  " *(x-xp-(ax*(az*(z-zp)+ay*(y-yp)+ax*(x-xp)))/a2))"
     e[++m] = sprintf("%s - D", R)
     return format_expr(e)
 }
@@ -159,7 +168,7 @@ function expr_ellipse(     ax, xp, yp, zp, rx, ry, ang) {
 	"-(1.0*(pow(y0,2.0)+pow(x0,2.0))"				\
 	"*(pow(pow(rx,2.0)*pow(y0,2.0)+pow(ry,2.0)*pow(x0,2.0),0.5)-1.0*rx*ry)" \
 	"*pow(pow(rx,6.0)*pow(y0,6.0)+3.0*pow(rx,4.0)*pow(ry,2.0)*pow(x0,2.0)" \
-        "                             *pow(y0,4.0)" \
+	"                             *pow(y0,4.0)" \
 	"+3.0*pow(rx,2.0)*pow(ry,4.0)*pow(x0,4.0)" \
 	"*pow(y0,2.0)+pow(ry,6.0)*pow(x0,6.0)," \
 	"0.5))" \
@@ -186,7 +195,7 @@ function expr_egg(     ax, xp, yp, zp, rx, ry, ang, eg) {
     e[++m] = sprintf("xp = %s, yp = %s, zp = %s", xp, yp, zp)
     e[++m] = sprintf("rx = %s, ry = %s", rx, ry)
     e[++m] = sprintf("ang = %s", ang)
-    e[++m] = sprintf("eg  = %s", eg)    
+    e[++m] = sprintf("eg  = %s", eg)
     if (ax == "XY") {
 	e[++m] = "x0 = sin(ang)*(y-yp)+cos(ang)*(x-xp)"
 	e[++m] = "y0 = cos(ang)*(y-yp)-sin(ang)*(x-xp)"
@@ -253,12 +262,12 @@ function expr_egg(     ax, xp, yp, zp, rx, ry, ang, eg) {
 
 function expr_sphere(m, xc, yc, zc, R, e) {
     xc = $3; yc=$4; zc=$5; R=$7
-    e[++m] =         "x  = xorg, y = yorg, z = zorg"    
+    e[++m] =         "x  = xorg, y = yorg, z = zorg"
     e[++m] = sprintf("r2 = (x-%s)*(x-%s) + (y-%s)*(y-%s) + (z-%s)*(z-%s)",
 		     xc, xc, yc, yc, zc, zc)
     e[++m] = sprintf("r0 = sqrt(r2)")
     e[++m] = sprintf("%s - r0", R)
-    return format_expr(e)    
+    return format_expr(e)
 }
 
 function upd_def(k, def, val) { # update if k == def
@@ -403,7 +412,7 @@ $1=="extent" {
     psub("yextent", yextent)
     psub("zextent", zextent)
     next
-    
+
 }
 
 $1=="N" {
@@ -455,6 +464,10 @@ $1 == "ellipse" {
 
 $1 == "egg" {
     expr2code(expr_egg())
+}
+
+$1 == "point" {
+    expr2code(expr_point())
 }
 
 {

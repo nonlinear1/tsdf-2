@@ -57,6 +57,15 @@ float xo, yo, zo; /* center of rotation */
 
 float xorg, yorg, zorg, s;
 
+float min3(float a, float b, float c) { return fmin(a, fmin(b, c)); }
+float sq(float x) { return x*x; }
+
+float gauss(float x, float y, float z) {
+  float r2 = sq(x) + sq(y) + sq(z);
+  if (r2 > sq(5)) return OBJ_MARGIN;
+  else            return 3*exp(-r2/sq(5)) - 4.0;
+}
+
 void rotX(float* x, float* y, float al) {
   float x0 = *x, y0 = *y;
   *x = x0*cos(al) - y0*sin(al);
@@ -86,7 +95,7 @@ float in_interval(float d, float dlo, float dhi) {
   return
 	d < dlo ? 0 :
 	d > dhi ? 0 :
-	          1
+		  1
       ;
 }
 
@@ -102,20 +111,12 @@ float de(float d, float dlo, float dhi) {
   return d > dc ? abs(d - dhi) : abs(d - dlo);
 }
 
-float min3(float a, float b, float c) {
-  return fmin(a, fmin(b, c));
-}
-
-float sq(float x) {
-  return x*x;
-}
-
 
 float in_range(float s) {
   return
     s >  OBJ_MARGIN ?  OBJ_MARGIN :
     s < -OBJ_MARGIN ? -OBJ_MARGIN :
-                                s
+				s
   ;
 }
 
@@ -142,7 +143,7 @@ float wall_wins(float so, float sn) {
   if (in_wall(so) && in_void(sn))
     return so;
 
-  // prefer one inside the wall  
+  // prefer one inside the wall
   if (in_wall(sn) && in_void(so))
     return sn;
 
@@ -174,7 +175,7 @@ float void_wins(float so, float sn) {
 }
 
 int main(int /*argc */, char **argv) {
-  
+
   FILE * f = fopen(argv[1], "w");
   fprintf(f, "%f %f %f\n", xextent, yextent, zextent);
   fprintf(f, "%d %d %d\n", NX, NY, NZ);

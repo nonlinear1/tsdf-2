@@ -1,6 +1,6 @@
 CPPFLAGS = -O2 -g -Wall -Wextra
 
-P = sdf2volume sdf2volume2 sdf2vtk mergesdf # prgrams
+P = tsdf tsdf.awk sdf2volume sdf2volume2 sdf2vtk mergesdf # programs
 all: $P
 
 B  = $(HOME)/bin
