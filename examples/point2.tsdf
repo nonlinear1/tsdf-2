@@ -1,0 +1,8 @@
+extent     20 20 20
+N          100
+obj_margin 3.0
+
+!point xc  yc zc
+!point x14 yc zc
+!point x34 yc zc
+
